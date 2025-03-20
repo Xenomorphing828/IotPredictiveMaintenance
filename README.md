@@ -1,6 +1,4 @@
-<h1>JWipe - Disk Sanitization</h1>
-
- ### [YouTube Demonstration](https://youtu.be/7eJexJVCqJo)
+<h1>Iot Predictive Maintenance</h1>
 
 <h2>Description</h2>
 Project consists of a simple PowerShell script that walks the user through "zeroing out" (wiping) any drives that are connected to the system. The utility allows you to select the target disk and choose the number of passes that are performed. The PowerShell script will configure a diskpart script file based on the user's selections and then launch Diskpart to perform the disk sanitization.
@@ -9,17 +7,16 @@ Project consists of a simple PowerShell script that walks the user through "zero
 
 <h2>Languages and Utilities Used</h2>
 
-- <b>PowerShell</b> 
-- <b>Diskpart</b>
+- <b>Python</b> 
 
-<h2>Environments Used </h2>
+<h2>Sample Data for Analysis </h2>
 
-- <b>Windows 10</b> (21H2)
+- <b>[Sample Data](https://innoventureseducation-my.sharepoint.com/:u:/g/personal/dia220376_diaestudents_com/EcVON_UBYCRJv2AsscJvuSoBCF0BZKS1jjBdHvRlfO0u0g?e=jmfADI)</b> 
 
 <h2>Program walk-through:</h2>
 
 <p align="center">
-Launch the utility: <br/>
+
 <img src="https://i.imgur.com/62TgaWL.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
 <br />
 <br />
