@@ -1,7 +1,16 @@
-<h1>Iot Predictive Maintenance</h1>
+<h1>Iot Predictive Maintenance Synthetic Data Generation</h1>
 
 <h2>Description</h2>
-Project consists of a simple PowerShell script that walks the user through "zeroing out" (wiping) any drives that are connected to the system. The utility allows you to select the target disk and choose the number of passes that are performed. The PowerShell script will configure a diskpart script file based on the user's selections and then launch Diskpart to perform the disk sanitization.
+This project generates synthetic sensor data for predictive maintenance applications. The data simulates temperature, vibration, and pressure readings over a 30-day period at 1-second intervals. The dataset includes labels indicating whether a failure condition is met based on predefined thresholds for each sensor. The generated data is saved to a CSV file and visualized using matplotlib. <br />
+
+<h3>Key Features:</h3>
+Synthetic Data Generation: Simulates realistic sensor data with noise and trends.
+
+Failure Conditions: Labels are generated based on thresholds for temperature, vibration, and pressure.
+
+Visualization: Plots the temperature data over time, highlighting failure points.
+
+This project is useful for testing and developing predictive maintenance algorithms without the need for real-world data.
 <br />
 
 
