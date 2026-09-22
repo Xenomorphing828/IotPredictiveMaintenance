@@ -1,55 +1,93 @@
-<h1>Iot Predictive Maintenance Synthetic Data Generation</h1>
+# IoT Predictive Maintenance System for Aircraft Engines
 
-<h2>Description</h2>
-This project generates synthetic sensor data for predictive maintenance applications. The data simulates temperature, vibration, and pressure readings over a 30-day period at 1-second intervals. The dataset includes labels indicating whether a failure condition is met based on predefined thresholds for each sensor. The generated data is saved to a CSV file and visualized using matplotlib. <br />
+Predicting the **Remaining Useful Life (RUL)** of turbofan engines from multivariate sensor data, using the NASA C-MAPSS dataset, and turning those predictions into maintenance alerts.
 
-<h3>Key Features:</h3>
-Synthetic Data Generation: Simulates realistic sensor data with noise and trends.
+## Description
 
-Failure Conditions: Labels are generated based on thresholds for temperature, vibration, and pressure.
+Unplanned engine failures are expensive and dangerous, while replacing parts too early wastes money. This project uses sensor readings from aircraft engines to estimate how many more operating cycles each engine can run before it fails. Those estimates then feed a maintenance recommendation system that ranks engines by urgency.
 
-Visualization: Plots the temperature data over time, highlighting failure points.
+The project uses the **FD001** subset of NASA's C-MAPSS (Commercial Modular Aero-Propulsion System Simulation) dataset. It contains 100 training engines that were run until failure and 100 test engines whose data stops at some point before failure.
 
-This project is useful for testing and developing predictive maintenance algorithms without the need for real-world data.
-<br />
+## Key Features
 
+**Data exploration:** Plots sensor trends against engine life and uses correlation analysis to find the sensors most strongly linked to wear (sensors 12, 7, 21, and 20).
 
-<h2>Languages and Utilities Used</h2>
+**Feature engineering:** Converts each engine's sensor history into 10-cycle rolling windows. For each of the 24 inputs (21 sensors and 3 operating settings), it calculates the mean, standard deviation, and latest value, giving 72 features per time step.
 
-- <b>Python</b> 
+**Leak-free validation:** Splits the data 80/20 **by engine** rather than by row, so no engine appears in both training and validation. This gives a realistic picture of how the model performs on engines it has never seen.
 
-<h2>Sample Data for Analysis </h2>
+**Model:** A Gradient Boosting Regressor (scikit-learn) trained on the scaled features.
 
-- <b>[Sample Data](https://innoventureseducation-my.sharepoint.com/:u:/g/personal/dia220376_diaestudents_com/EcVON_UBYCRJv2AsscJvuSoBCF0BZKS1jjBdHvRlfO0u0g?e=jmfADI)</b> 
+**Maintenance alert system:** Maps each predicted RUL to one of four priority levels, each with a recommended action and timeline:
 
-<h2>Program walk-through:</h2>
+| Level | Meaning | Recommended action |
+|---|---|---|
+| 🔴 Critical | Failure imminent | Shut down and perform emergency maintenance within 24 hours |
+| 🟠 High | High failure risk | Schedule urgent maintenance within 1 week |
+| 🟡 Medium | Monitor closely | Maintain during next planned downtime (within 1 month) |
+| 🟢 Low | Normal operation | Continue routine monitoring |
 
-<p align="center">
+**Dashboard:** Four Matplotlib charts showing the priority distribution, predicted vs. actual RUL, a maintenance timeline, and prediction error by priority level.
 
-<img src="https://i.imgur.com/1f86b0G.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-<br />
-<br />
-<img src="https://i.imgur.com/O47EbWo.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-<br />
-<br />
-<img src="https://i.imgur.com/5ROOtBo.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-<br />
-<br />
-<img src="https://i.imgur.com/4yDmzlD.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-<br />
-<br />
-<img src="https://i.imgur.com/XaoYAGa.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-<br />
-<br />=
-<img src="https://i.imgur.com/64ogFkP.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-</p>
+## Results
 
-<!--
- ```diff
-- text in red
-+ text in green
-! text in orange
-# text in gray
-@@ text in purple (and bold)@@
-```
---!>
+Evaluated on NASA's held-out test set of 100 engines:
+
+| Metric | Validation (20% of training engines) | Test (100 engines) |
+|---|---|---|
+| MAE | 32.64 cycles | **21.97 cycles** |
+| R² | 0.547 | **0.470** |
+
+The alert system sorted the 100 test engines as follows: **11 critical, 9 high, 10 medium, 70 low**, flagging 20 engines for urgent attention.
+
+Sample predictions:
+
+| Engine | Predicted RUL | Actual RUL | Error |
+|---|---|---|---|
+| 3 | 63.9 | 69 | 5.1 |
+| 8 | 110.9 | 95 | -15.9 |
+| 10 | 99.1 | 96 | -3.1 |
+| 4 | 110.2 | 82 | -28.2 |
+
+## Tech Stack
+
+Python, Pandas, NumPy, scikit-learn, Matplotlib, Jupyter Notebook
+
+## How to Run
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/<your-username>/<repo-name>.git
+   cd <repo-name>
+   ```
+2. Install the dependencies:
+   ```bash
+   pip install pandas numpy scikit-learn matplotlib jupyter
+   ```
+3. Download the C-MAPSS dataset from the NASA Prognostics Data Repository (also available on Kaggle), and place these files in the project folder:
+   - `train_FD001.txt`
+   - `test_FD001.txt`
+   - `RUL_FD001.txt`
+4. Open and run the notebook:
+   ```bash
+   jupyter notebook IotMaintenance.ipynb
+   ```
+
+## Limitations
+
+- **Confidence scores:** The confidence level attached to each alert is currently calculated from the engine's actual RUL, which would not be known in a real deployment. The alert tiers should be treated as a proof of concept.
+- **Early-life predictions:** The model tends to overestimate RUL for healthy engines, where sensor readings change very little.
+- **Run-to-run variation:** The engine split is not seeded, so results may vary slightly between runs.
+- **Single subset:** Only FD001 (one operating condition, one fault mode) is used so far.
+
+## Future Improvements
+
+- Cap training RUL values (a piecewise-linear target), a common approach for C-MAPSS that reduces early-life overestimation
+- Compare against LSTM and 1D-CNN models on the raw sensor sequences
+- Derive confidence from prediction uncertainty, such as quantile regression or model ensembles
+- Extend to the FD002–FD004 subsets with multiple operating conditions and fault modes
+- Report RMSE and the NASA scoring function for comparison with published benchmarks
+
+## Dataset Reference
+
+A. Saxena, K. Goebel, D. Simon, and N. Eklund, "Damage Propagation Modeling for Aircraft Engine Run-to-Failure Simulation," *International Conference on Prognostics and Health Management*, 2008.
